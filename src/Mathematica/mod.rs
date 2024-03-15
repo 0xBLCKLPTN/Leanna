@@ -1,1 +1,1 @@
-pub mod leanna_vector;
+pub mod vectors;

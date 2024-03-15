@@ -1,6 +1,6 @@
 mod Mathematica;
 
-use Mathematica::leanna_vector;
+use Mathematica::vectors;
 
 fn main() {
     println!("Hello, world!");
