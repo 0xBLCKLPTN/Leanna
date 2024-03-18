@@ -5,6 +5,7 @@
     UPD: Andrei Ciobanu.
 */
 #include "vectors.hh"
+#include "random.hh"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -14,13 +15,6 @@ typedef struct Matix_s {
     double **data;
     int is_square;
 } Matrix_t;
-
-#define	RAND_MAX	0x7fffffff
-double rnd(double min, double max) {
-  double d;
-  d = (double) rand() / ((double) RAND_MAX + 1);
-  return (min + d * (max - min));
-}
 
 Matrix_t* Matrix(unsigned int num_rows, unsigned int num_cols) {
     if (num_rows == 0 || num_cols == 0) {
@@ -78,4 +72,43 @@ Matrix_t *Matrix_eye(unsigned int size) {
         mat->data[i][i] = 1.0;
     }
   return mat;
+}
+
+// Checks if two matrices have the same dimesions
+int is_eqdim(Matrix_t *mat, Matrix_t *mat2) {
+    return ((mat->num_cols == mat2->num_cols) &&
+            (mat->num_rows == mat2->num_rows))
+}
+
+int is_mat_eq(Matrix_t *mat, Matrix_t *mat2 , double tolerance) {
+    if (!is_eqdim(mat, mat2)) {
+        return 0;
+    }
+
+    unsigned int i, j;
+    for(i = 0; i < mat->num_rows; i++) {
+    for(j = 0; j < mat->num_cols; j++) {
+      if (fabs(mat->data[i][j] - mat2->data[i][j]) > tolerance) {
+        return 0;
+      }
+    }
+  }
+  return 1;
+
+}
+
+void matrix_print(Matrix_t *matrix) {
+    matrix_printf(matrix, "%lf\t\t");
+}
+
+void matrix_printf(Matrix_t *matirx, const char *d_fmt) {
+    unsigned int i, j;
+    fprintf(stdout, "\n");
+    for(i = 0; i < matrix->num_rows; ++i) {
+        for(j = 0; j < matrix->num_cols; ++j) {
+            fprintf(stdout, d_fmt, matrix->data[i][j]);
+        }
+        fprintf(stdout, "\n");
+    }
+    fprintf(stdout, "\n");
 }
