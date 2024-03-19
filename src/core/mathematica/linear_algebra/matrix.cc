@@ -1,111 +1,111 @@
-/*
-    Filename: Matrix.cc
-    Description: All matrix methods.
-
-    UPD: Andrei Ciobanu.
-*/
-#include "vectors.hh"
-#include "random.hh"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include "random.hh"
 
-typedef struct Matix_s {
+typedef struct matrix_s {
     unsigned int num_rows;
     unsigned int num_cols;
     double **data;
-    int is_square;
-} Matrix_t;
+    int is_square;    
+} matrix_t;
 
-Matrix_t* Matrix(unsigned int num_rows, unsigned int num_cols) {
-    if (num_rows == 0 || num_cols == 0) {
-        printf("Cannot create matrix. Num rows or num cols is null.\n");
-    }
 
-    Matrix_t* m = (Matrix_t*) calloc(1, sizeof(*m));
-    // check memory f(m).
-    m->num_rows = num_rows;
-    m->num_cols = num_cols;
-    m->is_square = (num_rows == num_cols) ? 1 : 0;
-    m->data = (double**) calloc(m->num_rows, sizeof(*m->data));
-    // check mem f(m->data).
+/*  new_matrix
+        - int num_cols,
+        - int num_rows.
+    returns simple matrix [[0, ..., 0n], ... [0, ..., 0n]m];
 
-    for (unsigned int i = 0; i < m->num_cols; ++i) {
-        m->data[i] = (double*) calloc(m->num_cols, sizeof(*m->data));
-        // check mem f(m->data[i])
-    }
-    return m;
+    Usage example:
+    ```c
+        matrix_t *matrix = new_matrix(12,12);
+        free_matrix(matrix);
+    ```
+    After usage you need to free memory.
+*/
+matrix_t *new_matrix(unsigned int num_cols, unsigned int num_rows)
+{
+    if (num_cols == 0 || num_rows == 0)
+        printf("Cannot create matrix. Rows or cols cannot be equal 0.")
+
+    matrix_t *matrix = (matrix_t*) calloc(1, sizeof(*m));
+    matrix->num_rows = num_rows;
+    matrix->num_cols = num_cols;
+    matrix->is_square = (num_rows == num_cols) ? 1 : 0;
+    matrix->data = (double**) calloc(matrix->num_rows, sizeof(*matrix->data));
+
+    for (unsigned int i = 0; i < matrix->num_cols; ++i)
+        matrix->data[i] = (double*) calloc(matrix->num_cols, sizeof(*matrix->data));
+
+    return matrix;
 }
 
-void Matrix_free(Matrix_t *mat) {
-    unsigned int i;
-    for (i = 0; i < mat->num_rows; ++i) {
-        free(mat->data[i]);
-    }
-    free(mat->data);
-    free(mat);
+/*  new_rnd_matrix
+        - int num_cols,
+        - int num_rows,
+        - double min,
+        - double max.
+    returns simple matrix
+            [[1 * rnd(min,max), (1 * rnd(min_max))n],
+             ....
+            [1 * rnd(min,max), ..., nm], ...];
+
+    Usage example:
+    ```c
+        matrix_t *matrix = new_rnd_matrix(12,12, 1, 4);
+        free_matrix(matrix);
+    ```
+    After usage you need to free memory.
+*/
+matrix_t *new_rnd_matrix(unsigned int num_rows, unsigned int num_cols, double min, double max)
+{
+    matrix_t *matrtix = new_matrix(num_rows, num_cols);
+    
+    for (unsigned int i = 0; i < num_rows; i++)
+        for (unsigned int j = 0; j < num_cols; j++)
+            matrix->data[i][j] = rnd(min, max);
+    return matrix;
 }
 
-Matrix_t *Matrix_rnd(unsigned int num_rows, unsigned int num_cols, double min, double max) {
-    Matrix_t *mat = Matrix(num_rows, num_cols);
-    unsigned int i, j;
+/*
+    new_square_matrix:
+        - int size.
+    returns square matrix:
+        [[], [], [],
+         [], [], [],
+         [], [], []].
 
-    for(i = 0; i < num_rows; i++) {
-        for(j = 0; j < num_cols; j++) {
-        mat->data[i][j] = rnd(min, max);
-        }
-    }
-    return mat;
+    Usage example:
+    ```c
+        matrix_t *matrix = new_square_matrix(12);
+        free_matrix(matrix);
+    ```
+*/
+matrix_t *new_square_matrix(unsigned int size) {
+    return new_matrix(size, size);
 }
 
-Matrix_t *Matrix_square(unsigned int size) {
-    return Matrix(size, size);
+
+matrix_t *new_rnd_square_matrix(unsigned int size, double min, double max) {
+    return new_rnd_matrix(size, size, min, max);
 }
 
-Matrix_t *Matrix_square_rnd(unsigned int size, double min, double max) {
-    return Matrix_rnd(size, size, min, max);
+void free_matrix(matrix_t *matrix)
+{
+    for (unsigned int i = 0; i < matrix->num_rows; i++)
+        free(matrix->data[i])
+    free(matrix->data);
+    free(matrix);
 }
 
-Matrix_t *Matrix_eye(unsigned int size) {
-    Matrix_t *mat = Matrix(size, size);
-
-    for(unsigned int i = 0; i < mat->num_rows; i++) {
-        mat->data[i][i] = 1.0;
-    }
-  return mat;
-}
-
-// Checks if two matrices have the same dimesions
-int is_eqdim(Matrix_t *mat, Matrix_t *mat2) {
-    return ((mat->num_cols == mat2->num_cols) &&
-            (mat->num_rows == mat2->num_rows))
-}
-
-int is_mat_eq(Matrix_t *mat, Matrix_t *mat2 , double tolerance) {
-    if (!is_eqdim(mat, mat2)) {
-        return 0;
-    }
-
-    unsigned int i, j;
-    for(i = 0; i < mat->num_rows; i++) {
-    for(j = 0; j < mat->num_cols; j++) {
-      if (fabs(mat->data[i][j] - mat2->data[i][j]) > tolerance) {
-        return 0;
-      }
-    }
-  }
-  return 1;
-
-}
-
-void matrix_print(Matrix_t *matrix) {
+void matrix_print(matrix_t *matrix) {
     matrix_printf(matrix, "%lf\t\t");
 }
 
-void matrix_printf(Matrix_t *matirx, const char *d_fmt) {
-    unsigned int i, j;
+void matrix_printf(matrix_t *matrix, const char *d_fmt)
+{
     fprintf(stdout, "\n");
-    for(i = 0; i < matrix->num_rows; ++i) {
-        for(j = 0; j < matrix->num_cols; ++j) {
+    for (unsigned int i = 0; i < matrix->num_rows; ++i) {
+        for (unsigned int j = 0; j < matrix->num_cols; ++j) {
             fprintf(stdout, d_fmt, matrix->data[i][j]);
         }
         fprintf(stdout, "\n");
